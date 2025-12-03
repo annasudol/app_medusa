@@ -99,6 +99,7 @@ const Payment = ({
       setIsLoading(false)
     }
   }
+  console.log(availablePaymentMethods, 'availablePaymentMethods')
 
   useEffect(() => {
     setError(null)
