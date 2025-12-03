@@ -20,6 +20,7 @@ export const listCartShippingMethods = async (cartId: string) => {
         method: "GET",
         query: {
           cart_id: cartId,
+          is_return: false,
         },
         headers,
         next,
@@ -27,7 +28,8 @@ export const listCartShippingMethods = async (cartId: string) => {
       }
     )
     .then(({ shipping_options }) => shipping_options)
-    .catch(() => {
+    .catch((error) => {
+      console.error("Error fetching shipping options:", error)
       return null
     })
 }
