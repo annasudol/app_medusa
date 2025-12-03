@@ -1,8 +1,8 @@
 import { HttpTypes } from "@medusajs/types"
 import { NextRequest, NextResponse } from "next/server"
 
-const BACKEND_URL = 'https://fortunate-laugh-contemn.medusajs.app'
-const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+const BACKEND_URL = process.env.MEDUSA_BACKEND_URL || 'https://juicy-arrival-forbid.medusajs.app'
+const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || 'pk_bdb4160756dd10668e99490832900ce04febbbe2e1b82f48c330a907419cd82a'
 const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
 
 const regionMapCache = {
