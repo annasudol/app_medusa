@@ -71,7 +71,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
   try {
     const token = await sdk.auth.register("customer", "emailpass", {
       email: customerForm.email,
-      password: password,
+      password: customerForm.email,
     })
 
     await setAuthToken(token as string)
@@ -87,8 +87,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
     )
 
     const loginToken = await sdk.auth.login("customer", "emailpass", {
-      email: customerForm.email,
-      password,
+      email: customerForm.email,      
     })
 
     await setAuthToken(loginToken as string)
@@ -110,7 +109,7 @@ export async function login(_currentState: unknown, formData: FormData) {
 
   try {
     await sdk.auth
-      .login("customer", "emailpass", { email, password })
+      .login("customer", "emailpass", { email, password: email, })
       .then(async (token) => {
         await setAuthToken(token as string)
         const customerCacheTag = await getCacheTag("customers")
