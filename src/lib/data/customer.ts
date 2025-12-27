@@ -87,7 +87,8 @@ export async function signup(_currentState: unknown, formData: FormData) {
     )
 
     const loginToken = await sdk.auth.login("customer", "emailpass", {
-      email: customerForm.email,      
+      email: customerForm.email,
+      password: customerForm.email,
     })
 
     await setAuthToken(loginToken as string)
@@ -108,15 +109,39 @@ export async function login(_currentState: unknown, formData: FormData) {
   const password = formData.get("password") as string
 
   try {
+    // Try logging in with the provided password
     await sdk.auth
-      .login("customer", "emailpass", { email, password: email, })
+      .login("customer", "emailpass", { email, password })
       .then(async (token) => {
         await setAuthToken(token as string)
         const customerCacheTag = await getCacheTag("customers")
         revalidateTag(customerCacheTag)
       })
   } catch (error: any) {
-    return error.toString()
+    const errorMessage = error.toString()
+    console.log('error', errorMessage)
+
+    // Check if error is due to invalid email or password
+    if (errorMessage.includes("Invalid email or password") || errorMessage.includes("Unauthorized")) {
+      // Initiate password reset flow for the user
+      try {
+
+        await sdk.auth.resetPassword("customer", "emailpass", {
+          identifier: email,
+        })
+        
+        // Return message indicating password reset email has been sent
+        return "Invalid email or password. Please check your email for password reset instructions."
+      } catch (resetError: any) {
+        console.log('reset error', resetError.toString())
+        return "Login failed. Please try again or reset your password."
+      }
+      finally {
+        console.log('finished handling login error')
+      }
+    }
+
+    return errorMessage
   }
 
   try {
@@ -257,4 +282,51 @@ export const updateCustomerAddress = async (
     .catch((err) => {
       return { success: false, error: err.toString() }
     })
+}
+
+export async function requestPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const email = formData.get("email") as string
+
+  if (!email) {
+    return "Email is required"
+  }
+
+  try {
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    })
+    return null
+  } catch (error: any) {
+    return error.toString()
+  }
+}
+
+export async function resetPassword(
+  formData: FormData
+) {
+  const token = formData.get("token") as string
+  const email = formData.get("email") as string
+  const password = formData.get("password") as string
+
+  if (!token || !email || !password) {
+    return "All fields are required"
+  }
+
+  try {
+    await sdk.auth.updateProvider(
+      "customer",
+      "emailpass",
+      {
+        email,
+        password,
+      },
+      token
+    )
+    return null
+  } catch (error: any) {
+    return error.toString()
+  }
 }
